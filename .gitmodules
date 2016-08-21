@@ -1,0 +1,3 @@
+[submodule "classes/core/PubSub"]
+	path = classes/core/PubSub
+	url = https://Komat@github.com/Komat/C-_Classes_PubSub.git
