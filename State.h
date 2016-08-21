@@ -12,22 +12,26 @@
 #include "classes/core/PubSub/PubSub.h"
 
 
-enum _TOPIC {
-    STAY,
-    CHANGE,
-    ENTER,
-    EXIT,
+typedef enum _TOPIC {
+    STAY_STATE,
+    CHANGE_STATE,
+    ENTER_STATE,
+    EXIT_STATE,
     STATE_TOPIC_LEN
-};
+} STATE_TOPIC;
+
+
 
 class State : public PubSub {
 private:
     const char *id;
     bool isCurrent;
+
 public:
+
     State(const char *id);
 
-    const char *getId() const;
+    void * getId() const;
 
     bool isIsCurrent() const;
 
@@ -45,7 +49,13 @@ public:
 
     void (*superOnExit)();
 
-    static _TOPIC TOPIC;
+
+    void once(const std::string &topic, std::function<void(std::string topicType)> subscriber);
+
+
+    const static std::string TOPIC[];
+
+
 
 };
 
