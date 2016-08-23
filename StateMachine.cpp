@@ -7,6 +7,7 @@
  */
 
 #include "StateMachine.h"
+#include <iostream>
 
 StateMachine::StateMachine() {
     currentId = "";
@@ -22,30 +23,57 @@ void StateMachine::add(State state) {
 }
 
 
-void StateMachine::oneceHandler(std::string topic, void * topicOption) {
-    publish(topic, topicOption);
+void StateMachine::onceHandler(std::string topic, const std::string state_id) {
+
+    if (topic == State::TOPIC[ENTER_STATE]) {
+        currentId = state_id;
+    } else if (topic == State::TOPIC[EXIT_STATE]) {
+
+        std::map<const std::string, State>::iterator state = _stateList.find(state_id);
+
+        auto once = std::bind(&StateMachine::onceHandler, this, State::TOPIC[ENTER_STATE], state->second.getId());
+
+        state->second.once(State::TOPIC[ENTER_STATE], once);
+        state->second.onEnter();
+
+    }
+
+    publish(topic, state_id);
+
 }
 
 
 void StateMachine::go(const std::string state_id) {
+
     if (hasState(state_id)) {
 
         std::map<const std::string, State>::iterator state = _stateList.find(state_id);
 
-//        state->second.once(State::TOPIC[ENTER_STATE], (topicFunctionPtr) oneceHandler);
-        state->second.onEnter();
-//        publish(State::TOPIC[ENTER_STATE]);
-        currentId = state->second.getId();
+        if (!currentId.empty()) {
 
-//        if (it->second != currentId) {
-//            if (currentId) currentId->stateExit();
-//            currentId = it->second;
-//            currentId->stateEnter();
-//        }
-//        std::cout << "TRUE::" << state_id << std::endl;
-//        std::cout << "TRUE" << _stateList.find(state_id) << std::endl;
-//        subscribe(State::TOPIC::ENTER);
-//        currentId = _stateList[state_id];
+            if (state->second.getId() != currentId) {
+
+                std::map<const std::string, State>::iterator currentState = _stateList.find(currentId);
+
+                auto once = std::bind(&StateMachine::onceHandler, this, State::TOPIC[EXIT_STATE], state->second.getId());
+
+                currentState->second.once(State::TOPIC[EXIT_STATE], once);
+                currentState->second.onExit();
+
+            } else {
+                state->second.onStay();
+                publish(State::TOPIC[STAY_STATE], state->second.getId());
+            }
+
+        } else {
+
+            auto once = std::bind(&StateMachine::onceHandler, this, State::TOPIC[ENTER_STATE], state->second.getId());
+
+            state->second.once(State::TOPIC[ENTER_STATE], once);
+            state->second.onEnter();
+
+        }
+
     }
 }
 
@@ -53,8 +81,10 @@ void StateMachine::exit(const std::string) {
 
 }
 
-void StateMachine::once(const std::string &topic, topicFunctionPtr subscriber) {
+void StateMachine::once(const std::string &topic, StateHandler subscriber) {
     subscribeOnce(topic, subscriber);
+    // TODO(20160823): 何か once なのに2回目もハンドリングしてしまうっぽい用テスト
+    publish(topic, "DUMMY");
 }
 
 State &StateMachine::getCurrentState() {

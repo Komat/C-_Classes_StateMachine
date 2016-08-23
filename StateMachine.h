@@ -12,18 +12,18 @@
 #include <iostream>
 #include "State.h"
 
-class StateMachine: public PubSub {
+class StateMachine: public PubSub<StateHandler> {
 private:
     std::map<const std::string, State> _stateList;
     std::string currentId;
-    void oneceHandler(std::string topic, void * topicOption);
+    void onceHandler(std::string topic, const std::string stateId);
 public:
     StateMachine();
     bool hasState(const std::string);
     void add(State);
     void go(const std::string);
     void exit(const std::string);
-    void once(const std::string &topic, topicFunctionPtr subscriber);
+    void once(const std::string &topic, StateHandler subscriber);
     State & getCurrentState();
 };
 

@@ -1,5 +1,4 @@
 #include <iostream>
-#include "State.h"
 #include "StateMachine.h"
 
 
@@ -16,35 +15,28 @@ int sleep(unsigned long x) {
 }
 
 
-
 /**
  * 購読開始
  */
-void state_exit_handler(const std::string &topic) {
-    std::cout << "HANDLER >> " << topic << std::endl;
+void state_exit_handler(const std::string &topic, const std::string &str) {
+    std::cout << "HANDLER >> " << topic << " ===> " << str << std::endl;
 }
-
-
-
-/**
- * 購読開始
- */
-void state_stay_handler(const std::string &topic) {
-    std::cout << "HANDLER >> " << topic << std::endl;
-}
-
 
 
 /**
  * 購読開始
  */
-void state_enter_handler(const std::string &topic) {
-    std::cout << "HANDLER >> " << topic << std::endl;
+void state_stay_handler(const std::string &topic, const std::string &str) {
+    std::cout << "HANDLER >> " << topic << " ===> " << str << std::endl;
 }
 
 
-
-
+/**
+ * 購読開始
+ */
+void state_enter_handler(const std::string &topic, const std::string &str) {
+    std::cout << "HANDLER >> " << topic << " ===> " << str << std::endl;
+}
 
 
 int main() {
@@ -57,11 +49,18 @@ int main() {
     stateMachine.add(Intro);
     stateMachine.add(Main);
 
-    stateMachine.once(State::TOPIC[ENTER_STATE], (topicFunctionPtr) state_enter_handler);
-    stateMachine.once(State::TOPIC[STAY_STATE], (topicFunctionPtr) state_stay_handler);
-    stateMachine.once(State::TOPIC[EXIT_STATE], (topicFunctionPtr) state_exit_handler);
+//    stateMachine.once(State::TOPIC[ENTER_STATE], state_enter_handler);
+//    stateMachine.once(State::TOPIC[STAY_STATE], state_stay_handler);
+//    stateMachine.once(State::TOPIC[EXIT_STATE], state_exit_handler);
 
-    stateMachine.go(Main.getId());
+    // TODO(20160823): 何か once なのに2回目もハンドリングしてしまうっぽい
+    stateMachine.once(State::TOPIC[ENTER_STATE], [&](const std::string &topic, const std::string &str) {
+        std::cout << "@ONCEState::TOPIC[ENTER_STATE]->HANDLER() >> " << str << std::endl;
+        stateMachine.go(Main.getId());
+    });
+
+    stateMachine.go(Intro.getId());
+
 
 
     return 0;

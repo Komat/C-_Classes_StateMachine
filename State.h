@@ -21,17 +21,20 @@ typedef enum _TOPIC {
 } STATE_TOPIC;
 
 
+typedef std::function<void(const std::string &topic, const std::string & str)> StateHandler;
 
-class State : public PubSub {
+
+
+class State : public PubSub<StateHandler> {
 private:
-    const char *id;
+    const std::string id;
     bool isCurrent;
 
 public:
 
-    State(const char *id);
+    State(const std::string &id);
 
-    void * getId() const;
+    const std::string getId() const;
 
     bool isIsCurrent() const;
 
@@ -50,7 +53,7 @@ public:
     void (*superOnExit)();
 
 
-    void once(const std::string &topic, std::function<void(std::string topicType)> subscriber);
+    void once(const std::string &topic, StateHandler subscriber);
 
 
     const static std::string TOPIC[];

@@ -9,32 +9,33 @@
 #include "State.h"
 
 
-State::State(const char *id) {
-    this->id = id;
-    isCurrent = false;
+State::State(const std::string &id) : id(id) {
 }
 
 void State::onEnter() {
     isCurrent = true;
-    publish(State::TOPIC[CHANGE_STATE], NULL);
-    publish(State::TOPIC[ENTER_STATE], NULL);
+
+    std::cout << " [ ON ENTER ] " << this->id << std::endl;
+
+    publish(State::TOPIC[CHANGE_STATE], this->id);
+    publish(State::TOPIC[ENTER_STATE], this->id);
 }
 
 void State::onStay() {
     if (!isCurrent) {
         isCurrent = true;
     }
-    publish(State::TOPIC[STAY_STATE], NULL);
+    publish(State::TOPIC[STAY_STATE], this->id);
 }
 
 void State::onExit() {
     isCurrent = false;
-    publish(State::TOPIC[CHANGE_STATE], NULL);
-    publish(State::TOPIC[EXIT_STATE], NULL);
+    publish(State::TOPIC[CHANGE_STATE], this->id);
+    publish(State::TOPIC[EXIT_STATE], this->id);
 }
 
-void * State::getId() const {
-    return (void *) id;
+const std::string State::getId() const {
+    return id;
 }
 
 bool State::isIsCurrent() const {
@@ -45,12 +46,9 @@ void State::setIsCurrent(bool isCurrent) {
     State::isCurrent = isCurrent;
 }
 
-void State::once(const std::string &topic, std::function<void(std::string _topic)> subscriber) {
-    subscriber(topic);
-//    subscribeOnce(topic, subscriber);
+void State::once(const std::string &topic, StateHandler subscriber) {
+  subscribeOnce(topic, subscriber);
 }
-
-
 
 
 const std::string State::TOPIC[] = {
@@ -59,5 +57,6 @@ const std::string State::TOPIC[] = {
         "enter_state",
         "exit_state"
 };
+
 
 
