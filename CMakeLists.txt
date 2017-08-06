@@ -3,5 +3,12 @@ project(StateMachine)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 
-set(SOURCE_FILES main.cpp classes/core/PubSub/PubSub.h StateMachine.cpp StateMachine.h State.cpp State.h)
+set(SOURCE_FILES
+        main.cpp
+        classes/core/PubSub/PubSub.h
+        State.cpp
+        State.h
+        StateMachine.cpp
+        StateMachine.h
+)
 add_executable(StateMachine ${SOURCE_FILES})

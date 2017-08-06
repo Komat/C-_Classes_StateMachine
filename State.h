@@ -25,7 +25,7 @@ typedef std::function<void(const std::string &topic, const std::string & str)> S
 
 
 
-class State : public PubSub<StateHandler> {
+class State : public PubSub<> {
 private:
     const std::string id;
     bool isCurrent;

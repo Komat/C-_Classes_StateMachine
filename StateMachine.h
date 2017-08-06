@@ -12,7 +12,7 @@
 #include <iostream>
 #include "State.h"
 
-class StateMachine: public PubSub<StateHandler> {
+class StateMachine: public PubSub<> {
 private:
     std::map<const std::string, State> _stateList;
     std::string currentId;
